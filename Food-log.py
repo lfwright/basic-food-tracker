@@ -79,7 +79,7 @@ def initalise_database():
         )
 
 
-        cur.execute('''INSERT INTO current_id)
+        cur.execute('''INSERT INTO current_id''')
     
     conn.commit()
     conn.close()
