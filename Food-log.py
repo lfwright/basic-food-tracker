@@ -44,54 +44,76 @@ def initalise_database():
                     ,protein REAL
                     ,carbohydrates REAL
                     ,fat REAL
-                    ,type TEXT)'''
+                    ,item_name TEXT NOT NULL
+                    ,type_id INTEGER)'''
         )
         
         cur.execute('''CREATE TABLE meal
-                   (meal_id INTEGER PRIMARY KEY
-                   ,item_id INTEGER
-                   ,amount REAL)'''
+                   (meal_id INTEGER NOT NULL
+                   ,item_id INTEGER NOT NULL
+                   ,amount REAL
+                   ,meal_name TEXT NOT NULL
+                    PRIMARY KEY (meal_id, item_id)
+                    FOREIGN KEY (item_id) REFERENCES item(item_id)
+                   )'''
         )
 
         cur.execute('''CREATE TABLE journal
                    (journal_id INTEGER PRIMARY KEY
-                   ,date_id INTEGER
-                   ,meal_id INTEGER)'''
+                   ,date_id INTEGER NOT NULL
+                   ,meal_id INTEGER NOT NULL
+                    FOREIGN KEY (meal_id) REFERENCES meal(meal_id)
+                   )'''
         )
 
-
-        cur.execute('''CREATE TABLE item_key
-                   (item_id INTEGER PRIMARY KEY
-                   ,item_name TEXT)'''
+        cur.execute('''CREATE TABLE type_key
+                   (type_id INTEGER PRIMARY KEY
+                   ,type_name TEXT NOT NULL)'''
         )
 
+        conn.commit()
 
-        cur.execute('''CREATE TABLE meal_key
-                   (meal_id INTEGER PRIMARY KEY
-                   ,meal_name TEXT)'''
+        cur.execute('''INSERT INTO type_key(type_id, type_name)
+                       (0, 'grams');
+
+                       INSERT INTO type_key(type_id, type_name)
+                       (1, 'single');
+
+                       INSERT INTO type_key(type_id, type_name)
+                       (2, 'volume');'''
         )
+        conn.commit()
+        conn.close()
 
+def create_example_data():
+    conn = sqlite3.connect("fdlg.db")
+    cur = conn.cursor()
 
-        cur.execute('''CREATE TABLE current_id
-                   (journal_id INTEGER 
-                   ,meal_id 
-                   ,item_id)'''
-        )
+    cur.execute('''INSERT INTO item(calories, protein, carbohydrates, fat, item_name, type_id)
+                   (0.23, 0.029, 0.013, 0.008, 'spinach', 0);
 
+                   INSERT INTO item(calories, protein, carbohydrates, fat, item_name, type_id)
+                   (8.84, 0, 0, 1, 'olive oil', 0);
 
-        cur.execute('''INSERT INTO current_id''')
-    
+                   INSERT INTO item(calories, protein, carbohydrates, fat, item_name, type_id)
+                   (0.19, 0, 0 , 0, 'red wine vinegar', 0);
+
+                   INSERT INTO meal(meal_id, item_id, amount, meal_name)
+                   (1, 1, 140, 'spinach salad');
+
+                   INSERT INTO meal(meal_id, item_id, amount, meal_name)
+                   (1, 2, 34, 'spinach salad');
+
+                   INSERT INTO meal(meal_id, item_id, amount, meal_name)
+                   (1, 3, 17, 'spinach salad');
+                   '''
+    )
     conn.commit()
     conn.close()
-
-def create_example_date():
-    conn = sqlite3.connect("fdlg.db")
 
     
 if __name__ == "__main__":
     move_to_directory()
     if not os.access("fdlg.db", os.F_OK):
-        initalise_database()
-        create_example_data()
-
-    
+#        initalise_database()
+#        create_example_data()
