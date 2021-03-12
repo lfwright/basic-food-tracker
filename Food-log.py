@@ -7,8 +7,8 @@
 ##     meal table
 ##      item table
 ##
-##    item - key table
-##    meal - keys table
+##    type key table
+## 
 
 ## create gui with pyQt
 
@@ -39,6 +39,11 @@ def move_to_directory():
         os.mkdir('/tmp/food-log')
         os.chdir('/tmp/food-log')
 
+def read_statements(path):
+    f = open(path, 'r')
+    stmt = (f.read()).split(';')
+    return stmt
+        
 def attempt_execution(cur, sql):
     try:
         cur.execute(sql)
@@ -56,53 +61,8 @@ def initalise_database():
 
     print('initalising database')
     try:
-        init_sql = [
-            '''CREATE TABLE item
-            (item_id INTEGER PRIMARY KEY
-            ,calories REAL
-            ,protein REAL
-            ,carbohydrates REAL
-            ,fat REAL
-            ,item_name TEXT NOT NULL
-            ,type_id INTEGER)'''
-            ,
-            
-            '''CREATE TABLE meal
-            (meal_id INTEGER NOT NULL
-            ,item_id INTEGER NOT NULL
-            ,amount REAL
-            ,meal_name TEXT NOT NULL
-            ,PRIMARY KEY (meal_id, item_id)
-            ,FOREIGN KEY (item_id) REFERENCES item(item_id)
-            )'''
-            ,
-        
-            '''CREATE TABLE journal
-            (journal_id INTEGER PRIMARY KEY
-            ,date_id TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-            ,meal_id INTEGER NOT NULL
-            ,FOREIGN KEY (meal_id) REFERENCES meal(meal_id)
-            )'''
-            ,
-	    
-            '''CREATE TABLE type_key
-            (type_id INTEGER PRIMARY KEY
-            ,type_name TEXT NOT NULL)'''
-            ,
-	    
-            '''INSERT INTO type_key(type_id, type_name)
-            values(0, 'grams')'''
-            ,
-	    
-            '''INSERT INTO type_key(type_id, type_name)
-            values(1, 'single')'''
-            ,
-	
-            '''INSERT INTO type_key(type_id, type_name)
-            values(2, 'volume')'''
-        ]
-
-        for sql in init_sql:
+        init_sql = read_statements(src_dir + "/init_database.sql")
+        for sql in init_sql:            
             attempt_execution(cur, sql)
             print(sql[0:30])
             
@@ -151,8 +111,9 @@ def create_example_data():
     
 if __name__ == "__main__":
     run_parser()
-    
+
+    src_dir = os.getcwd()
     move_to_directory()
-    if True: #not os.access("fdlg.db", os.F_OK):
+    if not os.access("fdlg.db", os.F_OK):
         initalise_database()
         create_example_data()
