@@ -50,21 +50,17 @@ def attempt_execution(cur, sql):
     except Exception as e:
         print('error in sql: {0} \n {1}'.format(e, sql))
 
-def initalise_database():
-    #find program files and create directory
-    move_to_directory()
-    
-    #run inital sql statements
-
-    conn = sqlite3.connect("fdlg.db")
-    cur = conn.cursor()
-
-    print('initalising database')
+def run_sql(sql_file, verbose = False):
     try:
-        init_sql = read_statements(src_dir + "/init_database.sql")
+        conn = sqlite3.connect("fdlg.db")
+        cur = conn.cursor()
+
+        init_sql = read_statements(src_dir + "/" + sql_file)
+        
         for sql in init_sql:            
             attempt_execution(cur, sql)
-            print(sql[0:30])
+            if verbose:
+                print(sql[0:30])
             
     except Exception as e:
         print('exception: {}'.format(e))
@@ -72,47 +68,31 @@ def initalise_database():
         conn.commit()
         conn.close()
 
+
+def initalise_database():
+    #find program files and create directory
+    move_to_directory()
+    
+    #create database initialisation statements
+
+    print('initalising database')
+
+    run_sql("init_database.sql", True)
+    
 def create_example_data():
-    conn = sqlite3.connect("fdlg.db")
-    cur = conn.cursor()
-    
-    cur.execute('''INSERT INTO item(calories, protein, carbohydrates, fat, item_name, type_id)
-    values(0.23, 0.029, 0.013, 0.008, 'spinach', 0)'''
-    )
-    
-    cur.execute('''INSERT INTO item(calories, protein, carbohydrates, fat, item_name, type_id)
-    values(8.84, 0, 0, 1, 'olive oil', 0)'''
-    )
-    
-    cur.execute('''INSERT INTO item(calories, protein, carbohydrates, fat, item_name, type_id)
-    values(0.19, 0, 0 , 0, 'red wine vinegar', 0)'''
-    )
-    
-    cur.execute('''INSERT INTO meal(meal_id, item_id, amount, meal_name)
-    values(1, 1, 140, 'spinach salad')'''
-    )
-    
-    cur.execute('''INSERT INTO meal(meal_id, item_id, amount, meal_name)
-    values(1, 2, 34, 'spinach salad')'''
-    )
-    
-    cur.execute('''INSERT INTO meal(meal_id, item_id, amount, meal_name)
-    values(1, 3, 17, 'spinach salad')'''
-    )
 
-    cur.execute('''INSERT INTO journal(meal_id)
-    values(1)'''
-    )
+    #load example data
+    
+    print('load example data')
 
-    
-    conn.commit()
-    conn.close()
-    
+    run_sql("example_data.sql")
+
     
 if __name__ == "__main__":
     run_parser()
 
     src_dir = os.getcwd()
+
     move_to_directory()
     if not os.access("fdlg.db", os.F_OK):
         initalise_database()
